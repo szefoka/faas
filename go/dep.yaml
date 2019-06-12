@@ -1,0 +1,20 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: go-redis
+  labels:
+    namespace: default
+    app: go-redis
+spec:
+  template:
+    metadata:
+      labels:
+        app: go-redis
+        version: v1
+    spec:
+      containers:
+      - name: go-redis
+        image: 128.110.154.115:5000/go_cont:latest
+        ports:
+        - containerPort: 15000
+
