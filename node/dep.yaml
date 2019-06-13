@@ -1,19 +1,19 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: go-redis
+  name: node-compute
   labels:
     namespace: default
-    app: go-redis
+    app: node-compute
 spec:
   template:
     metadata:
       labels:
-        app: go-redis
+        app: node-compute
         version: v1
     spec:
       containers:
-      - name: go-redis
+      - name: node-compute
         image:
         ports:
         - containerPort: 15000

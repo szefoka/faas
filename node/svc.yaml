@@ -1,0 +1,13 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: node-compute
+spec:
+  selector:
+    app: node-compute
+  ports:
+  - protocol: TCP
+    port: 15000
+    name: http
+  type: LoadBalancer
+
