@@ -14,6 +14,11 @@ import (
 	"runtime/trace"
 	"runtime"
 	"github.com/go-redis/redis"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
+	"github.com/google/uuid"
+	"context"
 //	"github.com/pkg/profile"
 
 	// "github.com/alexellis/golang-http-template/template/golang-http/function"
@@ -34,6 +39,7 @@ func makeRequestHandler() func(http.ResponseWriter, *http.Request) {
 	}
 }
 */
+/*
 func makeRequestHandler() func(http.ResponseWriter, *http.Request) {
         return func(w http.ResponseWriter, r *http.Request) {
                 if r.Body != nil {
@@ -52,6 +58,31 @@ func makeRequestHandler() func(http.ResponseWriter, *http.Request) {
 		}
                 w.Write([]byte(val))
         }
+}
+*/
+func makeRequestHandler() func(http.ResponseWriter, *http.Request) {
+        return func(w http.ResponseWriter, r *http.Request) {
+                if r.Body != nil {
+                        defer r.Body.Close()
+                }
+
+		type result struct {
+			_uuid string
+			value string
+		}
+		//ctx, _ := context.WithTimeout(context.Background(), 2*time.Second)
+		ctx := context.TODO()
+		client, _ := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
+		collection := client.Database("testdb").Collection("testColl")
+		_uuid, _ := uuid.NewRandom()
+		dict := bson.M{_uuid.String(): "Hello_go"}
+		res, _ := collection.InsertOne(ctx, dict)
+		var _r result
+		_ = collection.FindOne(ctx, dict).Decode(&_r)
+		_ = res.InsertedID
+		client.Disconnect(ctx)
+		w.Write([]byte("Hello"))
+	}
 }
 
 func newClient() *redis.Client {
