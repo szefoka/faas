@@ -14,6 +14,8 @@ import uuid
 
 from pymongo import MongoClient
 
+from cassandra.cluster import Cluster
+
 func_port = os.getenv('FUNC_PORT', 8080)
 
 timeout = float(os.getenv('FUNC_TIMEOUT', 180))
@@ -40,13 +42,31 @@ def func_mongo():
     res = str(db.testColl.find_one(t))
     return res
 
+def func_cassandra():
+    cluster = Cluster(['127.0.0.1'],  port=9042)
+    session = cluster.connect('testkp')
+    _uuid=(uuid.uuid4())
+    session.execute(
+        """
+        INSERT INTO test (key, value)
+        VALUES (%s, %s)
+        """,
+        (_uuid, "Hello_py")
+    )
+    res = session.execute(
+        session.prepare('SELECT * FROM test WHERE key=?'), [_uuid]
+    )
+    session.shutdown()
+    #print res[0]
+    return "hello"
+
 @app.route('/healthz')
 def healthz():
     return 'OK'
 
 @app.route('/faas-test', methods=['GET', 'POST', 'PATCH', 'DELETE'])
 def handler():
-    return func_mongo()
+    return func_cassandra()
 
 def signal_handler(sig, frame):
         print('You pressed Ctrl+C!')

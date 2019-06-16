@@ -14,11 +14,12 @@ import (
 	"runtime/trace"
 	"runtime"
 	"github.com/go-redis/redis"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo/options"
+//ű	"go.mongodb.org/mongo-driver/mongo"
+//	"go.mongodb.org/mongo-driver/bson"
+//	"go.mongodb.org/mongo-driver/mongo/options"
 	"github.com/google/uuid"
-	"context"
+//	"context"
+	"github.com/gocql/gocql"
 //	"github.com/pkg/profile"
 
 	// "github.com/alexellis/golang-http-template/template/golang-http/function"
@@ -60,6 +61,7 @@ func makeRequestHandler() func(http.ResponseWriter, *http.Request) {
         }
 }
 */
+/*
 func makeRequestHandler() func(http.ResponseWriter, *http.Request) {
         return func(w http.ResponseWriter, r *http.Request) {
                 if r.Body != nil {
@@ -84,6 +86,35 @@ func makeRequestHandler() func(http.ResponseWriter, *http.Request) {
 		w.Write([]byte("Hello"))
 	}
 }
+*/
+func makeRequestHandler() func(http.ResponseWriter, *http.Request) {
+        return func(w http.ResponseWriter, r *http.Request) {
+                if r.Body != nil {
+                        defer r.Body.Close()
+		}
+		cluster := gocql.NewCluster("127.0.0.1")
+			cluster.Keyspace = "testkp"
+		cluster.Consistency = gocql.Quorum
+		session, _ := cluster.CreateSession()
+		defer session.Close()
+		var id gocql.UUID
+		var text string
+		_uuid, _ := uuid.NewRandom()
+		s_uuid := _uuid.String()
+		
+		if err := session.Query(`INSERT INTO test (key, value) VALUES (?, ?)`,
+			s_uuid, "Hello_go").Exec(); err != nil {
+			log.Fatal(err)
+		}
+		if err := session.Query(`SELECT * FROM test WHERE key = ? LIMIT 1`,
+			s_uuid).Consistency(gocql.One).Scan(&id, &text); err != nil {
+			log.Fatal(err)
+		}
+                w.Write([]byte("Hello"))
+        }
+}
+
+
 
 func newClient() *redis.Client {
 	client := redis.NewClient(&redis.Options{
