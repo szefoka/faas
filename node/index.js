@@ -7,27 +7,29 @@ const hostname = '127.0.0.1';
 const port = 15000;
 
 const func_type = process.env.FUNC_TYPE
+var file_path = "";
+switch(func_type) {
+    case 'compute':
+        file_path = "./compute_service.js";
+        break;
+    case 'echo':
+        file_path = "./echo_service.js";
+        break;
+    case 'redis':
+        file_path = "./redis_service.js";
+        break;
+    case 'mongo':
+        file_path = "./mongo_service.js";
+        break;
+    case 'cassandra':
+        file_path = "./cassandra_service.js";
+        break;
+}
+
 
 function runService(workerData) {
   return new Promise((resolve, reject) => {
-    var file_path = ""
-    switch(func_type) {
-        case 'compute':
-            file_path = "compute_service"
-            break;
-        case 'echo':
-            file_path = "echo_service"
-            break;
-        case 'redis':
-            file_path = "redis_service"
-            break;
-        case 'mongo':
-            file_path = "mongo_service"
-            break;
-        case 'cassandra':
-            file_path = "cassandra_service"
-            break;
-    const worker = new Worker(filepath, { workerData });
+    const worker = new Worker(file_path, { workerData });
     worker.on('message', resolve);
     worker.on('error', reject);
     worker.on('exit', (code) => {
