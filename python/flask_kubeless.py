@@ -23,8 +23,6 @@ timeout = float(os.getenv('FUNC_TIMEOUT', 180))
 
 app = Flask(__name__)
 
-func_type = os.getenv('FUNC_TYPE')
-
 def func_echo():
     return "Hello"
 
@@ -71,23 +69,27 @@ def func_cassandra():
     #print res[0]
     return "hello"
 
+func_type = os.getenv('FUNC_TYPE')
+func_ptr = None
+if func_type == 'compute':
+    func_ptr = func_compute
+elif func_type == 'echo':
+    func_ptr = func_echo
+elif func_type == 'redis':
+    func_ptr = func_redis
+elif func_type == 'mongo':
+    func_ptr = func_mongo
+elif func_type == 'cassandra':
+    func_ptr =  func_cassandra
+
+
 @app.route('/healthz')
 def healthz():
     return 'OK'
 
 @app.route('/faas-test', methods=['GET', 'POST', 'PATCH', 'DELETE'])
 def handler():
-    if func_type == 'compute':
-        func_compute()
-    elif func_type == 'echo':
-        func_echo()
-    elif func_type == 'redis':
-        func_redis()
-    elif func_type == 'mongo':
-        func_mongo()
-    elif func_type == 'cassandra':
-        func_cassandra()
-    return func_cassandra()
+    func_ptr()
 
 def signal_handler(sig, frame):
         print('You pressed Ctrl+C!')
@@ -102,7 +104,7 @@ if __name__ == '__main__':
     #yep.start('file_name.prof')
     flask_mode = os.getenv('FLASK_MODE')
     if flask_mode == 'single':
-        app.run('0.0.0.0', 15000, debug=False, threaded = false)
+        app.run('0.0.0.0', 15000, debug=False, threaded = False)
     elif flask_mode == 'threaded':
         app.run('0.0.0.0', 15000, debug=False, threaded = true)
     elif flask_mode == 'multiprocess':
@@ -112,3 +114,4 @@ if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal_handler)
     print('Press Ctrl+C')
     signal.pause()
+
