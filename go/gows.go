@@ -14,107 +14,81 @@ import (
 	"runtime/trace"
 	"runtime"
 	"github.com/go-redis/redis"
-//ű	"go.mongodb.org/mongo-driver/mongo"
-//	"go.mongodb.org/mongo-driver/bson"
-//	"go.mongodb.org/mongo-driver/mongo/options"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/bson"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"github.com/google/uuid"
-//	"context"
+	"context"
 	"github.com/gocql/gocql"
 //	"github.com/pkg/profile"
 
 	// "github.com/alexellis/golang-http-template/template/golang-http/function"
 )
-/*
-func makeRequestHandler() func(http.ResponseWriter, *http.Request) {
-	return func(w http.ResponseWriter, r *http.Request) {
-		if r.Body != nil {
-			defer r.Body.Close()
-		}
 
-   	        sum := 0.0
-		for i := 0.0; i < 120000000.0; i++ {
-			sum += math.Sqrt(i)
+func compute_test() {
+	pi := 0.0
+	for i := 0.0; i < 5000000.0; i++ {
+		_new := 4.0/(1.0+i*2.0)
+		if ((int(i))%2) == 0 {
+			pi += _new
+		} else {
+			pi -= _new
 		}
-		sum = 0
-		w.Write([]byte("Hello"))
 	}
 }
-*/
-/*
-func makeRequestHandler() func(http.ResponseWriter, *http.Request) {
-        return func(w http.ResponseWriter, r *http.Request) {
-                if r.Body != nil {
-                        defer r.Body.Close()
-                }
 
-		client := newClient()
-		err := set(client)
-		if err != nil {
-			fmt.Println(err)
-		}
-
-		val, err := get(client)
-		if err != nil {
-			fmt.Println(err)
-		}
-                w.Write([]byte(val))
-        }
-}
-*/
-/*
-func makeRequestHandler() func(http.ResponseWriter, *http.Request) {
-        return func(w http.ResponseWriter, r *http.Request) {
-                if r.Body != nil {
-                        defer r.Body.Close()
-                }
-
-		type result struct {
-			_uuid string
-			value string
-		}
-		//ctx, _ := context.WithTimeout(context.Background(), 2*time.Second)
-		ctx := context.TODO()
-		client, _ := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
-		collection := client.Database("testdb").Collection("testColl")
-		_uuid, _ := uuid.NewRandom()
-		dict := bson.M{_uuid.String(): "Hello_go"}
-		res, _ := collection.InsertOne(ctx, dict)
-		var _r result
-		_ = collection.FindOne(ctx, dict).Decode(&_r)
-		_ = res.InsertedID
-		client.Disconnect(ctx)
-		w.Write([]byte("Hello"))
+func mongo_test() {
+	type result struct {
+		_uuid string
+		value string
 	}
+	//ctx, _ := context.WithTimeout(context.Background(), 2*time.Second)
+	ctx := context.TODO()
+	client, _ := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
+	collection := client.Database("testdb").Collection("testColl")
+	_uuid, _ := uuid.NewRandom()
+	dict := bson.M{_uuid.String(): "Hello_go"}
+	res, _ := collection.InsertOne(ctx, dict)
+	var _r result
+	_ = collection.FindOne(ctx, dict).Decode(&_r)
+	_ = res.InsertedID
+	client.Disconnect(ctx)
 }
-*/
-func makeRequestHandler() func(http.ResponseWriter, *http.Request) {
-        return func(w http.ResponseWriter, r *http.Request) {
-                if r.Body != nil {
-                        defer r.Body.Close()
-		}
-		cluster := gocql.NewCluster("127.0.0.1")
+
+func cassandra_test() {
+	cluster := gocql.NewCluster("127.0.0.1")
 			cluster.Keyspace = "testkp"
-		cluster.Consistency = gocql.Quorum
-		session, _ := cluster.CreateSession()
-		defer session.Close()
-		var id gocql.UUID
-		var text string
-		_uuid, _ := uuid.NewRandom()
-		s_uuid := _uuid.String()
-		
-		if err := session.Query(`INSERT INTO test (key, value) VALUES (?, ?)`,
-			s_uuid, "Hello_go").Exec(); err != nil {
-			log.Fatal(err)
-		}
-		if err := session.Query(`SELECT * FROM test WHERE key = ? LIMIT 1`,
-			s_uuid).Consistency(gocql.One).Scan(&id, &text); err != nil {
-			log.Fatal(err)
-		}
-                w.Write([]byte("Hello"))
-        }
+	cluster.Consistency = gocql.Quorum
+	session, _ := cluster.CreateSession()
+	defer session.Close()
+	var id gocql.UUID
+	var text string
+	_uuid, _ := uuid.NewRandom()
+	s_uuid := _uuid.String()
+
+	if err := session.Query(`INSERT INTO test (key, value) VALUES (?, ?)`,
+		s_uuid, "Hello_go").Exec(); err != nil {
+		log.Fatal(err)
+	}
+	if err := session.Query(`SELECT * FROM test WHERE key = ? LIMIT 1`,
+		s_uuid).Consistency(gocql.One).Scan(&id, &text); err != nil {
+		log.Fatal(err)
+	}
 }
 
+func redis_test() string {
+	client := newClient()
+	err := set(client)
+	if err != nil {
+		fmt.Println(err)
+	}
 
+	val, err := get(client)
+	if err != nil {
+		fmt.Println(err)
+	}
+	return val
+}
 
 func newClient() *redis.Client {
 	client := redis.NewClient(&redis.Options{
@@ -127,7 +101,10 @@ func newClient() *redis.Client {
 }
 
 func set(client *redis.Client) error {
-	err := client.Set("test", "Hello", 0).Err()
+        _uuid, _ := uuid.NewRandom()
+	s_uuid := _uuid.String()
+
+	err := client.Set(s_uuid, "Hello_go", 0).Err()
 	if err != nil {
 		return err
 	}
@@ -142,6 +119,28 @@ func get(client *redis.Client) (string, error) {
 	//fmt.Println("key", val)
 
 	return val, err
+}
+
+func makeRequestHandler() func(http.ResponseWriter, *http.Request) {
+        return func(w http.ResponseWriter, r *http.Request) {
+                if r.Body != nil {
+                        defer r.Body.Close()
+		}
+		func_type := os.Getenv("FUNC_TYPE")
+		switch func_type {
+			case "compute":
+				compute_test()
+			case "echo":
+				//do nothing
+			case "redis":
+				redis_test()
+			case "mongo":
+				mongo_test()
+			case "cassandra":
+				cassandra_test()			
+		}
+		w.Write([]byte("Hello"))
+        }
 }
 
 func main() {

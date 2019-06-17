@@ -11,6 +11,7 @@ import sys
 import signal
 #import yep
 import uuid
+import multiprocessing
 
 from pymongo import MongoClient
 
@@ -27,10 +28,23 @@ def funcWrap(q, data):
     except Exception as inst:
         q.put(inst)
 
+def func_echo():
+    return "Hello"
+
+def func_compute():
+    pi = 0.0
+    i = 0
+    while i < 5000000:
+        new = 4.0/(1.0+i*2.0)
+        if not i%2:
+            pi += new
+        else:
+            pi -= new
+        i += 1
+
 def func_redis():
     r = redis.Redis(host='localhost', port=6379, db=0)
-    #r.set('python_test', 'Hello')
-    r.set(str(uuid.uuid4()), 'Hello')
+    r.set(str(uuid.uuid4()), 'Hello_py')
     return r.get('python_test')
 
 def func_mongo():
@@ -66,6 +80,17 @@ def healthz():
 
 @app.route('/faas-test', methods=['GET', 'POST', 'PATCH', 'DELETE'])
 def handler():
+    func_type = os.getenv('FUNC_TYPE')
+    if func_type == 'compute':
+        func_compute()
+    elif func_type == 'echo':
+        func_echo()
+    elif func_type == 'redis':
+        func_redis()
+    elif func_type == 'mongo':
+        func_mongo()
+    elif func_type == 'cassandra':
+        func_cassandra()
     return func_cassandra()
 
 def signal_handler(sig, frame):
@@ -79,7 +104,15 @@ if __name__ == '__main__':
     log = logging.getLogger('werkzeug')
     log.setLevel(logging.ERROR)
     #yep.start('file_name.prof')
-    app.run('0.0.0.0', 15000, debug=False)
+    flask_mode = os.getenv('FLASK_MODE')
+    if flask_mode == 'single':
+        app.run('0.0.0.0', 15000, debug=False, threaded = false)
+    elif flask_mode == 'threaded':
+        app.run('0.0.0.0', 15000, debug=False, threaded = true)
+    elif flask_mode == 'multiprocess':
+        cores = multiprocessing.cpu_count()
+        app.run('0.0.0.0', 15000, debug=False, threaded = False, processes=cores)
+
     signal.signal(signal.SIGINT, signal_handler)
     print('Press Ctrl+C')
     signal.pause()
