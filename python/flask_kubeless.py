@@ -22,11 +22,8 @@ func_port = os.getenv('FUNC_PORT', 8080)
 timeout = float(os.getenv('FUNC_TIMEOUT', 180))
 
 app = Flask(__name__)
-def funcWrap(q, data):
-    try:
-        q.put(func(data))
-    except Exception as inst:
-        q.put(inst)
+
+func_type = os.getenv('FUNC_TYPE')
 
 def func_echo():
     return "Hello"
@@ -80,7 +77,6 @@ def healthz():
 
 @app.route('/faas-test', methods=['GET', 'POST', 'PATCH', 'DELETE'])
 def handler():
-    func_type = os.getenv('FUNC_TYPE')
     if func_type == 'compute':
         func_compute()
     elif func_type == 'echo':

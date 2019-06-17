@@ -25,6 +25,8 @@ import (
 	// "github.com/alexellis/golang-http-template/template/golang-http/function"
 )
 
+var func_type
+
 func compute_test() {
 	pi := 0.0
 	for i := 0.0; i < 5000000.0; i++ {
@@ -126,7 +128,6 @@ func makeRequestHandler() func(http.ResponseWriter, *http.Request) {
                 if r.Body != nil {
                         defer r.Body.Close()
 		}
-		func_type := os.Getenv("FUNC_TYPE")
 		switch func_type {
 			case "compute":
 				compute_test()
@@ -178,7 +179,7 @@ func main() {
 		os.Exit(0)
 	}()
 
-
+	func_type = os.Getenv("FUNC_TYPE")
 	s := &http.Server{
 		Addr:           fmt.Sprintf(":%d", 15000),
 		ReadTimeout:    3 * time.Second,

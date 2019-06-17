@@ -1,15 +1,33 @@
-
 // index.js
 // run with node --experimental-worker index.js on Node.js 10.x
 const http = require('http');
 const { Worker } = require('worker_threads')
 
 const hostname = '127.0.0.1';
-const port = 3000;
+const port = 15000;
+
+const func_type = process.env.FUNC_TYPE
 
 function runService(workerData) {
   return new Promise((resolve, reject) => {
-    const worker = new Worker('./service.js', { workerData });
+    var file_path = ""
+    switch(func_type) {
+        case 'compute':
+            file_path = "compute_service"
+            break;
+        case 'echo':
+            file_path = "echo_service"
+            break;
+        case 'redis':
+            file_path = "redis_service"
+            break;
+        case 'mongo':
+            file_path = "mongo_service"
+            break;
+        case 'cassandra':
+            file_path = "cassandra_service"
+            break;
+    const worker = new Worker(filepath, { workerData });
     worker.on('message', resolve);
     worker.on('error', reject);
     worker.on('exit', (code) => {
@@ -20,22 +38,15 @@ function runService(workerData) {
 }
 
 async function run(res) {
-  //const result = await runService('world');
   const result = runService('world');
   result.then(function () {
-    //console.log("resolved");
     res.end("Hello");
   });
   result.catch(function () {
     console.log("rejected");
   });
-//  res.end(result);
-//  console.log(result);
-//  res.end(result);
-//  console.log(result);
 }
 const server = http.createServer((req, res) => {
-   //run().catch(err => console.error(err))
   run(res);
 });
 
