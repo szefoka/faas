@@ -14,7 +14,9 @@ spec:
     spec:
       containers:
       - name: go-redis
-        image:
+        image: 128.110.154.115:5000/go-redis
         ports:
         - containerPort: 15000
-
+        env:
+        - name: FUNC_TYPE
+          value: "mongo"

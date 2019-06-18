@@ -1,7 +1,7 @@
 const { workerData, parentPort } = require('worker_threads')
 const uuidv4 = require('uuid/v4');
 const cassandra = require('cassandra-driver');
-const client = new cassandra.Client({ contactPoints: ['127.0.0.1'], keyspace: 'testkp', localDataCenter: 'datacenter1'});
+const client = new cassandra.Client({ contactPoints: ['cassandra.default.svc.cluster.local'], keyspace: 'testkp', localDataCenter: 'datacenter1'});
 var uuid = uuidv4()
 const i_query = 'INSERT INTO test (key, value) VALUES(?,?)'
 const i_params = [uuid, 'Hello_no']

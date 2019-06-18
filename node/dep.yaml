@@ -14,7 +14,9 @@ spec:
     spec:
       containers:
       - name: node-compute
-        image:
+        image: 128.110.154.115:5000/node-compute
         ports:
         - containerPort: 15000
-
+        env:
+        - name: FUNC_TYPE
+          value: "redis"

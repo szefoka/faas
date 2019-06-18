@@ -1,0 +1,19 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: cassandra
+  labels:
+    namespace: default
+    app: cassandra
+spec:
+  template:
+    metadata:
+      labels:
+        app: cassandra
+        version: v1
+    spec:
+      containers:
+      - name: cassandra
+        image: cassandra:latest
+        ports:
+        - containerPort: 9042

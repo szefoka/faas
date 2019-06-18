@@ -25,7 +25,9 @@ import (
 	// "github.com/alexellis/golang-http-template/template/golang-http/function"
 )
 
-var func_type
+var func_type = os.Getenv("FUNC_TYPE")
+type FuncTest func()
+var func_test FuncTest
 
 func compute_test() {
 	pi := 0.0
@@ -46,7 +48,7 @@ func mongo_test() {
 	}
 	//ctx, _ := context.WithTimeout(context.Background(), 2*time.Second)
 	ctx := context.TODO()
-	client, _ := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://localhost:27017"))
+	client, _ := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://mongodb.default.svc.cluster.local:27017"))
 	collection := client.Database("testdb").Collection("testColl")
 	_uuid, _ := uuid.NewRandom()
 	dict := bson.M{_uuid.String(): "Hello_go"}
@@ -58,7 +60,7 @@ func mongo_test() {
 }
 
 func cassandra_test() {
-	cluster := gocql.NewCluster("127.0.0.1")
+	cluster := gocql.NewCluster("cassandra.default.svc.cluster.local")
 			cluster.Keyspace = "testkp"
 	cluster.Consistency = gocql.Quorum
 	session, _ := cluster.CreateSession()
@@ -78,49 +80,16 @@ func cassandra_test() {
 	}
 }
 
-func redis_test() string {
-	client := newClient()
-	err := set(client)
-	if err != nil {
-		fmt.Println(err)
-	}
-
-	val, err := get(client)
-	if err != nil {
-		fmt.Println(err)
-	}
-	return val
-}
-
-func newClient() *redis.Client {
+func redis_test() {
 	client := redis.NewClient(&redis.Options{
-		Addr:     "localhost:6379",
+		Addr:     "redis-master.default.svc.cluster.local:6379",
 		Password: "", // no password set
 		DB:       0,  // use default DB
 	})
-
-	return client
-}
-
-func set(client *redis.Client) error {
-        _uuid, _ := uuid.NewRandom()
+	_uuid, _ := uuid.NewRandom()
 	s_uuid := _uuid.String()
-
-	err := client.Set(s_uuid, "Hello_go", 0).Err()
-	if err != nil {
-		return err
-	}
-	return nil
-}
-
-func get(client *redis.Client) (string, error) {
-	val, err := client.Get("test").Result()
-	if err != nil {
-		return "", err
-	}
-	//fmt.Println("key", val)
-
-	return val, err
+	client.Set(s_uuid, "Hello_go", 0).Err()
+	client.Get(s_uuid).Result()
 }
 
 func makeRequestHandler() func(http.ResponseWriter, *http.Request) {
@@ -128,17 +97,8 @@ func makeRequestHandler() func(http.ResponseWriter, *http.Request) {
                 if r.Body != nil {
                         defer r.Body.Close()
 		}
-		switch func_type {
-			case "compute":
-				compute_test()
-			case "echo":
-				//do nothing
-			case "redis":
-				redis_test()
-			case "mongo":
-				mongo_test()
-			case "cassandra":
-				cassandra_test()			
+		if func_test != nil {
+			func_test()
 		}
 		w.Write([]byte("Hello"))
         }
@@ -178,15 +138,25 @@ func main() {
                 f.Close()
 		os.Exit(0)
 	}()
-
-	func_type = os.Getenv("FUNC_TYPE")
+	switch func_type {
+		case "compute":
+			func_test = compute_test
+		case "echo":
+			//do nothing
+			func_test = nil
+		case "redis":
+			func_test = redis_test
+		case "mongo":
+			func_test = mongo_test
+		case "cassandra":
+			func_test = cassandra_test
+	}
 	s := &http.Server{
 		Addr:           fmt.Sprintf(":%d", 15000),
 		ReadTimeout:    3 * time.Second,
 		WriteTimeout:   3 * time.Second,
 		MaxHeaderBytes: 1 << 20, // Max header of 1MB
 	}
-
 	http.HandleFunc("/", makeRequestHandler())
 	log.Fatal(s.ListenAndServe())
 	wg.Wait()

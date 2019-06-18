@@ -5,6 +5,9 @@ WORKDIR /go/src/handler
 COPY . .
 RUN apk add git
 RUN go get -u github.com/go-redis/redis
+RUN go get go.mongodb.org/mongo-driver/mongo
+RUN go get github.com/gocql/gocql
+RUN go get github.com/google/uuid
 RUN go build gows.go
 
 FROM alpine:3.8
@@ -18,7 +21,7 @@ WORKDIR /home/app
 
 COPY --from=build /go/src/handler/gows    .
 
-RUN chown -R app /home/app
-USER app
+#RUN chown -R app /home/app
+#USER app
 CMD ["./gows"]
 

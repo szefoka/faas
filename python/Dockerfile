@@ -4,6 +4,8 @@ ARG ADDITIONAL_PACKAGE
 RUN apk --no-cache add ${ADDITIONAL_PACKAGE}
 RUN pip install flask
 RUN pip install redis
+RUN pip install pymongo
+RUN pip install cassandra-driver
 COPY . .
 USER root
 USER app

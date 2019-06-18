@@ -3,7 +3,7 @@
 const http = require('http');
 const { Worker } = require('worker_threads')
 
-const hostname = '127.0.0.1';
+const hostname = '0.0.0.0';
 const port = 15000;
 
 const func_type = process.env.FUNC_TYPE

@@ -14,7 +14,11 @@ spec:
     spec:
       containers:
       - name: python-redis
-        image:
+        image: 128.110.154.115:5000/python-redis
         ports:
         - containerPort: 15000
-
+        env:
+        - name: FUNC_TYPE
+          value: "redis"
+        - name: FLASK_MODE
+          value: "single"
