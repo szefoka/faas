@@ -1,10 +1,10 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: python-redis
+  name: python-test
 spec:
   selector:
-    app: python-redis
+    app: python-test
   ports:
   - protocol: TCP
     port: 15000

@@ -4,17 +4,17 @@ metadata:
   name: node-compute
   labels:
     namespace: default
-    app: node-compute
+    app: node-test
 spec:
   template:
     metadata:
       labels:
-        app: node-compute
+        app: node-test
         version: v1
     spec:
       containers:
-      - name: node-compute
-        image: 128.110.154.115:5000/node-compute
+      - name: node-test
+        image: 128.110.154.115:5000/node-test
         ports:
         - containerPort: 15000
         env:

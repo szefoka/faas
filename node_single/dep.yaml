@@ -1,22 +1,22 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: go-test
+  name: node-single-test
   labels:
     namespace: default
-    app: go-test
+    app: node-single-test
 spec:
   template:
     metadata:
       labels:
-        app: go-test
+        app: node-single-test
         version: v1
     spec:
       containers:
-      - name: go-test
-        image: 128.110.154.115:5000/go-test
+      - name: node-single-compute
+        image: 128.110.154.115:5000/node-single-test
         ports:
         - containerPort: 15000
         env:
         - name: FUNC_TYPE
-          value: "mongo"
+          value: "redis"

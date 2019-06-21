@@ -1,10 +1,10 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: go-redis
+  name: go-test
 spec:
   selector:
-    app: go-redis
+    app: go-test
   ports:
   - protocol: TCP
     port: 15000

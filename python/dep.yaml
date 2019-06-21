@@ -1,20 +1,20 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: python-redis
+  name: python-test
   labels:
     namespace: default
-    app: python-redis
+    app: python-test
 spec:
   template:
     metadata:
       labels:
-        app: python-redis
+        app: python-test
         version: v1
     spec:
       containers:
       - name: python-redis
-        image: 128.110.154.115:5000/python-redis
+        image: 128.110.154.115:5000/python-test
         ports:
         - containerPort: 15000
         env:
