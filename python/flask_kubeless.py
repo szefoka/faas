@@ -36,14 +36,13 @@ def func_compute():
         else:
             pi -= new
         i += 1
-    return "Hello"
+    return str(pi)
 
 def func_redis():
     r = redis.Redis(host='redis-master.default.svc.cluster.local', port=6379, db=0)
     _uuid = str(uuid.uuid4())
     r.set(_uuid, 'Hello_py')
-    r.get(_uuid)
-    return "Hello"
+    return r.get(_uuid)
 
 def func_mongo():
     client = MongoClient('mongodb.default.svc.cluster.local', 27017)
@@ -52,7 +51,7 @@ def func_mongo():
     t = {str(uuid.uuid4()):'Hello_py'}
     db.testColl.insert(t)
     res = str(db.testColl.find_one(t))
-    return "Hello"
+    return res
 
 def func_cassandra():
     cluster = Cluster(['cassandra.default.svc.cluster.local'],  port=9042)
@@ -69,8 +68,7 @@ def func_cassandra():
         session.prepare('SELECT * FROM test WHERE key=?'), [_uuid]
     )
     session.shutdown()
-    #print res[0]
-    return "Hello"
+    return res[0]
 
 func_type = os.getenv('FUNC_TYPE')
 func_ptr = None
