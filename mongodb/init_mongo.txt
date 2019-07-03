@@ -1,0 +1,4 @@
+use testdb
+db.createCollection("testColl")
+
+

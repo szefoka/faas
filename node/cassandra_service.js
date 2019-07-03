@@ -8,6 +8,5 @@ const i_params = [uuid, 'Hello_no']
 client.execute(i_query, i_params)
 const s_query = 'SELECT * FROM test WHERE key=?';
 const s_params = [uuid]
-client.execute(s_query, s_params, { prepare: true })
-parentPort.postMessage({ hello: workerData })
-
+client.execute(s_query, s_params, { prepare: true }).then(result => parentPort.postMessage(result.rows[0].value));
+//parentPort.postMessage({ hello: workerData })

@@ -1,13 +1,12 @@
-var http = require('http');
-const uuidv4 = require('uuid/v4');
-var MongoClient = require('mongodb').MongoClient;
-const cassandra = require('cassandra-driver');
-var redis = require('redis');
-
+const cluster = require('cluster');
+const http = require('http');
+const numCPUs = require('os').cpus().length;
 const hostname = '0.0.0.0';
 const port = 15000;
+
 var fptr;
 
+const num_procs = process.env.NUM_PROCS
 const func_type = process.env.FUNC_TYPE
 var file_path = "";
 switch(func_type) {
@@ -15,7 +14,7 @@ switch(func_type) {
         fptr = function () {
             var i;
             var pi = 0;
-            for (i = 0; i < 5000000; i++) {
+            for (i = 0; i < 50000; i++) {
                 _new = 4.0/(1.0+i*2.0);
                 if (i%2 != 0) {
                     pi += _new
@@ -62,7 +61,6 @@ switch(func_type) {
         break;
     case 'cassandra':
         fptr = function () {
-            const { workerData, parentPort } = require('worker_threads')
             const uuidv4 = require('uuid/v4');
             const cassandra = require('cassandra-driver');
             const client = new cassandra.Client({ contactPoints: ['cassandra.default.svc.cluster.local'], keyspace: 'testkp', localDataCenter: 'datacenter1'});
@@ -73,15 +71,35 @@ switch(func_type) {
             const s_query = 'SELECT * FROM test WHERE key=?';
             const s_params = [uuid]
             client.execute(s_query, s_params, { prepare: true })
-            parentPort.postMessage({ hello: workerData })
         }
         break;
 }
 
-//create a server object:
-http.createServer(function (req, res) {
+if (cluster.isMaster) {
+  console.log(`Master ${process.pid} is running`);
+
+  // Fork workers.
+  for (let i = 0; i < num_procs; i++) {
+    cluster.fork();
+  }
+  http.createServer((req, res) => {
   fptr();
   res.write('Hello World!'); //write a response to the client
   res.end(); //end the response
-}).listen(port); //the server object listens on port 8080
+  }).listen(port);
+
+//  cluster.on('exit', (worker, code, signal) => {
+//    console.log(`worker ${worker.process.pid} died`);
+//  });
+} else {
+  // Workers can share any TCP connection
+  // In this case it is an HTTP server
+  http.createServer((req, res) => {
+  fptr();
+  res.write('Hello World!'); //write a response to the client
+  res.end(); //end the response
+  }).listen(port);
+
+  console.log(`Worker ${process.pid} started`);
+}
 

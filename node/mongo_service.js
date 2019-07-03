@@ -2,7 +2,7 @@ const { workerData, parentPort } = require('worker_threads')
 const uuidv4 = require('uuid/v4');
 var MongoClient = require('mongodb').MongoClient;
 var url = "mongodb://mongodb.default.svc.cluster.local:27017/";
-
+var res;
 MongoClient.connect(url, { useNewUrlParser: true }, function(err, db) {
   if (err) throw err;
   var dbo = db.db("testdb");
@@ -13,8 +13,10 @@ MongoClient.connect(url, { useNewUrlParser: true }, function(err, db) {
   });
   dbo.collection("testColl").findOne(myobj, function(err, result) {
     //if (err) throw err;
-    //console.log(result);
+    res = result[uuid];
     db.close();
+    parentPort.postMessage(res);
   });
-});
-parentPort.postMessage({ hello: workerData })
+})
+//parentPort.postMessage(res);
+

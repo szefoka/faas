@@ -1,0 +1,9 @@
+CREATE KEYSPACE testkp
+  WITH REPLICATION = { 
+   'class' : 'SimpleStrategy', 
+   'replication_factor' : 1 
+  };
+
+use testkp;
+
+CREATE TABLE test ( key UUID PRIMARY KEY, value text);
