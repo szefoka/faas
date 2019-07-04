@@ -33,8 +33,7 @@ switch(func_type) {
         fptr = function (query, callback) {
             var redis = require('redis');
             const uuidv4 = require('uuid/v4');
-            //var client = redis.createClient(6379, 'redis-master.default.svc.cluster.local');
-            var client = redis.createClient(6379, '10.111.68.206');
+            var client = redis.createClient(6379, 'redis-master.default.svc.cluster.local');
             client.on('connect', function() {});
             client.on('error', function (err) {
                 console.log('Something went wrong ' + err);
@@ -51,8 +50,7 @@ switch(func_type) {
         fptr = function (query, callback) {
             const uuidv4 = require('uuid/v4');
             var MongoClient = require('mongodb').MongoClient;
-            //var url = "mongodb://mongodb.default.svc.cluster.local:27017/";
-            var url = "mongodb://10.104.72.201:27017/";
+            var url = "mongodb://mongodb.default.svc.cluster.local:27017/";
             MongoClient.connect(url, { useNewUrlParser: true }, function(err, db) {
                 if (err) throw err;
                 var dbo = db.db("testdb");
@@ -73,8 +71,7 @@ switch(func_type) {
         fptr = function (query, callback) {
             const uuidv4 = require('uuid/v4');
             const cassandra = require('cassandra-driver');
-            //const client = new cassandra.Client({ contactPoints: ['cassandra.default.svc.cluster.local'], keyspace: 'testkp', localDataCenter: 'datacenter1'});
-            const client = new cassandra.Client({ contactPoints: ['10.105.151.246'], keyspace: 'testkp', localDataCenter: 'datacenter1'});
+            const client = new cassandra.Client({ contactPoints: ['cassandra.default.svc.cluster.local'], keyspace: 'testkp', localDataCenter: 'datacenter1'});
             var uuid = uuidv4()
             const i_query = 'INSERT INTO test (key, value) VALUES(?,?)'
             const i_params = [uuid, 'Hello_no']

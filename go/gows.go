@@ -38,8 +38,7 @@ func compute_test() string {
 func mongo_test() string {
 	//ctx, _ := context.WithTimeout(context.Background(), 2*time.Second)
 	ctx := context.TODO()
-	//client, _ := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://mongodb.default.svc.cluster.local:27017"))
-	client, _ := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://10.104.72.201:27017"))
+	client, _ := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://mongodb.default.svc.cluster.local:27017"))
 	collection := client.Database("testdb").Collection("testColl")
 	_uuid, _ := uuid.NewRandom()
         _suuid := _uuid.String()
@@ -56,8 +55,7 @@ func mongo_test() string {
 }
 
 func cassandra_test() string {
-	//cluster := gocql.NewCluster("cassandra.default.svc.cluster.local")
-	cluster := gocql.NewCluster("10.105.151.246")
+	cluster := gocql.NewCluster("cassandra.default.svc.cluster.local")
 	cluster.Keyspace = "testkp"
 	cluster.Consistency = gocql.Quorum
 	session, _ := cluster.CreateSession()
@@ -80,8 +78,7 @@ func cassandra_test() string {
 
 func redis_test() string {
 	client := redis.NewClient(&redis.Options{
-		Addr:     "10.111.68.206:6379",
-		//Addr:     "redis-master.default.svc.cluster.local:6379",
+		Addr:     "redis-master.default.svc.cluster.local:6379",
 		Password: "", // no password set
 		DB:       0,  // use default DB
 	})
