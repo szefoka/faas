@@ -1,18 +1,14 @@
 package main
 
 import (
+	"strings"
 	"fmt"
+	"strconv"
 	"log"
-//	"math"
 	"net/http"
         _ "net/http/pprof"
-	"sync"
 	"time"
 	"os"
-	"os/signal"
-	"syscall"
-	"runtime/trace"
-	"runtime"
 	"github.com/go-redis/redis"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/bson"
@@ -20,16 +16,13 @@ import (
 	"github.com/google/uuid"
 	"context"
 	"github.com/gocql/gocql"
-//	"github.com/pkg/profile"
-
-	// "github.com/alexellis/golang-http-template/template/golang-http/function"
 )
 
 var func_type = os.Getenv("FUNC_TYPE")
-type FuncTest func()
+type FuncTest func() string
 var func_test FuncTest
 
-func compute_test() {
+func compute_test() string {
 	pi := 0.0
 	for i := 0.0; i < 5000000.0; i++ {
 		_new := 4.0/(1.0+i*2.0)
@@ -39,29 +32,33 @@ func compute_test() {
 			pi -= _new
 		}
 	}
+        return strconv.FormatFloat(pi, 'f', -1, 64)
 }
 
-func mongo_test() {
-	type result struct {
-		_uuid string
-		value string
-	}
+func mongo_test() string {
 	//ctx, _ := context.WithTimeout(context.Background(), 2*time.Second)
 	ctx := context.TODO()
-	client, _ := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://mongodb.default.svc.cluster.local:27017"))
+	//client, _ := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://mongodb.default.svc.cluster.local:27017"))
+	client, _ := mongo.Connect(ctx, options.Client().ApplyURI("mongodb://10.104.72.201:27017"))
 	collection := client.Database("testdb").Collection("testColl")
 	_uuid, _ := uuid.NewRandom()
-	dict := bson.M{_uuid.String(): "Hello_go"}
-	res, _ := collection.InsertOne(ctx, dict)
-	var _r result
-	_ = collection.FindOne(ctx, dict).Decode(&_r)
-	_ = res.InsertedID
+        _suuid := _uuid.String()
+	dict := bson.M{_suuid: "Hello_go"}
+	_, err := collection.InsertOne(ctx, dict)
+        var _r bson.Raw
+	_r, err = collection.FindOne(ctx, dict).DecodeBytes()
+        _res := _r.Lookup(_suuid)
+        if err != nil {
+            log.Fatal(err)
+        }
 	client.Disconnect(ctx)
+        return strings.Replace(_res.String(), "\"", "", -1)
 }
 
-func cassandra_test() {
-	cluster := gocql.NewCluster("cassandra.default.svc.cluster.local")
-			cluster.Keyspace = "testkp"
+func cassandra_test() string {
+	//cluster := gocql.NewCluster("cassandra.default.svc.cluster.local")
+	cluster := gocql.NewCluster("10.105.151.246")
+	cluster.Keyspace = "testkp"
 	cluster.Consistency = gocql.Quorum
 	session, _ := cluster.CreateSession()
 	defer session.Close()
@@ -78,66 +75,40 @@ func cassandra_test() {
 		s_uuid).Consistency(gocql.One).Scan(&id, &text); err != nil {
 		log.Fatal(err)
 	}
+        return text
 }
 
-func redis_test() {
+func redis_test() string {
 	client := redis.NewClient(&redis.Options{
-		Addr:     "redis-master.default.svc.cluster.local:6379",
+		Addr:     "10.111.68.206:6379",
+		//Addr:     "redis-master.default.svc.cluster.local:6379",
 		Password: "", // no password set
 		DB:       0,  // use default DB
 	})
 	_uuid, _ := uuid.NewRandom()
 	s_uuid := _uuid.String()
 	client.Set(s_uuid, "Hello_go", 0).Err()
-	client.Get(s_uuid).Result()
+	val, err := client.Get(s_uuid).Result()
+	if err != nil {
+		panic(err)
+	}
+        return val
 }
 
 func makeRequestHandler() func(http.ResponseWriter, *http.Request) {
         return func(w http.ResponseWriter, r *http.Request) {
+                var res = "Hello"
                 if r.Body != nil {
                         defer r.Body.Close()
 		}
 		if func_test != nil {
-			func_test()
+			res = func_test()
 		}
-		w.Write([]byte("Hello"))
+		w.Write([]byte(res))
         }
 }
 
 func main() {
-//	defer profile.Start().Stop()
-	runtime.SetMutexProfileFraction(1)
-
-	f, err := os.Create("./trace.out")
-	if err != nil {
-		panic(err)
-	}
-	defer f.Close()
-
-	err = trace.Start(f)
-	if err != nil {
-		panic(err)
-	}
-	defer trace.Stop()
-
-	go func() {
-		log.Println(http.ListenAndServe("0.0.0.0:6060", nil))
-	}()
-	var wg sync.WaitGroup
-	wg.Add(1)
-
-	var gracefulStop = make(chan os.Signal)
-	signal.Notify(gracefulStop, syscall.SIGTERM)
-	signal.Notify(gracefulStop, syscall.SIGINT)
-	go func() {
-		sig := <-gracefulStop
-		fmt.Printf("caught sig: %+v", sig)
-		fmt.Println("Wait for 2 second to finish processing")
-		time.Sleep(2*time.Second)
-		trace.Stop()
-                f.Close()
-		os.Exit(0)
-	}()
 	switch func_type {
 		case "compute":
 			func_test = compute_test
@@ -159,22 +130,5 @@ func main() {
 	}
 	http.HandleFunc("/", makeRequestHandler())
 	log.Fatal(s.ListenAndServe())
-	wg.Wait()
-/*
-	var gracefulStop = make(chan os.Signal)
-	signal.Notify(gracefulStop, syscall.SIGTERM)
-	signal.Notify(gracefulStop, syscall.SIGINT)
-
-	go func() {
-		sig := <-gracefulStop
-		fmt.Printf("caught sig: %+v", sig)
-		fmt.Println("Wait for 2 second to finish processing")
-		time.Sleep(2*time.Second)
-		os.Exit(0)
-	}()
-*/
-	signalChan := make(chan os.Signal, 1)
-	signal.Notify(signalChan, os.Interrupt)
-	<-signalChan
 }
 

@@ -29,7 +29,7 @@ def func_echo():
 def func_compute():
     pi = 0.0
     i = 0
-    while i < 5000000:
+    while i < 50000:
         new = 4.0/(1.0+i*2.0)
         if not i%2:
             pi += new
@@ -39,36 +39,44 @@ def func_compute():
     return str(pi)
 
 def func_redis():
-    r = redis.Redis(host='redis-master.default.svc.cluster.local', port=6379, db=0)
-    _uuid = str(uuid.uuid4())
-    r.set(_uuid, 'Hello_py')
-    return r.get(_uuid)
+    try:
+        r = redis.Redis(host='redis-master.default.svc.cluster.local', port=6379, db=0)
+        _uuid = str(uuid.uuid4())
+        r.set(_uuid, 'Hello_py')
+        return r.get(_uuid)
+    finally:
+        r.connection_pool.disconnect()
 
 def func_mongo():
-    client = MongoClient('mongodb.default.svc.cluster.local', 27017)
-    db = client['testdb']
-    collection = db.testColl
-    t = {str(uuid.uuid4()):'Hello_py'}
-    db.testColl.insert(t)
-    res = str(db.testColl.find_one(t))
-    return res
+    try:
+        client = MongoClient('mongodb.default.svc.cluster.local', 27017)
+        db = client['testdb']
+        collection = db.testColl
+        _uuid = str(uuid.uuid4())
+        t = {_uuid:'Hello_py'}
+        db.testColl.insert(t)
+        return str(db.testColl.find_one(t)[_uuid])
+    finally:
+        client.close()
 
 def func_cassandra():
-    cluster = Cluster(['cassandra.default.svc.cluster.local'],  port=9042)
-    session = cluster.connect('testkp')
-    _uuid=uuid.uuid4()
-    session.execute(
-        """
-        INSERT INTO test (key, value)
-        VALUES (%s, %s)
-        """,
-        (_uuid, "Hello_py")
-    )
-    res = session.execute(
-        session.prepare('SELECT * FROM test WHERE key=?'), [_uuid]
-    )
-    session.shutdown()
-    return res[0]
+    try:
+        cluster = Cluster(['cassandra.default.svc.cluster.local'],  port=9042)
+        session = cluster.connect('testkp')
+        _uuid=uuid.uuid4()
+        session.execute(
+            """
+            INSERT INTO test (key, value)
+            VALUES (%s, %s)
+            """,
+            (_uuid, "Hello_py")
+        )
+        res = session.execute(
+            session.prepare('SELECT * FROM test WHERE key=?'), [_uuid]
+        )
+        return res[0][1]
+    finally:
+        cluster.shutdown()
 
 func_type = os.getenv('FUNC_TYPE')
 func_ptr = None
@@ -115,4 +123,5 @@ if __name__ == '__main__':
     signal.signal(signal.SIGINT, signal_handler)
     print('Press Ctrl+C')
     signal.pause()
+
 
