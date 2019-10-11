@@ -14,9 +14,22 @@ spec:
     spec:
       containers:
       - name: node-single-compute
-        image: 128.110.154.115:5000/node-single-test
+        image: 
         ports:
         - containerPort: 15000
         env:
         - name: FUNC_TYPE
           value: "redis"
+        - name: NUM_PROCS
+          value: "1"
+        - name: USE_CG_TRICK
+          value: "1"
+        - name: V8_CPU_TIME
+          value: "60000"
+        - name: UV_CPU_TIME
+          value: "40000"
+        resources:
+          limits:
+            cpu: "1000m"
+        securityContext:
+          privileged: true

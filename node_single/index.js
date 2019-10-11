@@ -1,14 +1,20 @@
 const cluster = require('cluster');
 const http = require('http');
 const numCPUs = require('os').cpus().length;
+const fs = require('fs');
 const hostname = '0.0.0.0';
 const port = 15000;
 
 var fptr;
 
-const num_procs = process.env.NUM_PROCS
-const func_type = process.env.FUNC_TYPE
+process.env.UV_THREADPOOL_SIZE = 1;
+const num_procs = process.env.NUM_PROCS;
+const func_type = process.env.FUNC_TYPE;
+const cgtrick = process.env.USE_CG_TRICK;
+uv_cpu_time = process.env.UV_CPU_TIME;
+v8_cpu_time = process.env.V8_CPU_TIME;
 var file_path = "";
+var first_run = cgtrick;
 switch(func_type) {
     case 'compute':
         fptr = function (query, callback) {
@@ -43,6 +49,33 @@ switch(func_type) {
             client.get(uuid, function (err, reply) {
                 callback(reply);
                 client.quit();
+                if (first_run!=0) {
+                    first_run = 0;
+                    fs.mkdirSync("/sys/fs/cgroup/cpuacct/node", 0755);
+                    fs.mkdirSync("/sys/fs/cgroup/cpuacct/node/v8", 0755);
+                    fs.mkdirSync("/sys/fs/cgroup/cpuacct/node/uv", 0755);
+                    fs.writeFile("/sys/fs/cgroup/cpuacct/node/v8/tasks", "1", function(err) {
+                        if(err) { return console.log(err); }
+                        console.log("The file was saved! 1");
+                    });
+                    fs.writeFile("/sys/fs/cgroup/cpuacct/node/v8/cpu.cfs_quota_us", v8_cpu_time, function(err) {
+                        if(err) { return console.log(err); }
+                        console.log("The file was saved! 2");
+                    });
+                    fs.readFile('/sys/fs/cgroup/cpuacct/tasks', 'utf-8', function(err, data) {
+                        if (err) { throw err; }
+                        var lines = data.trim().split('\n');
+                        var lastLine = lines.slice(-1)[0];
+                        fs.writeFile("/sys/fs/cgroup/cpuacct/node/uv/tasks", lastLine, function(err) {
+                            if(err) { return console.log(err); }
+                            console.log("The file was saved! 3");
+                        });
+                    });
+                    fs.writeFile("/sys/fs/cgroup/cpuacct/node/uv/cpu.cfs_quota_us", uv_cpu_time, function(err) {
+                        if(err) { return console.log(err); }
+                        console.log("The file was saved! 4");
+                    });
+                }
             });
         }
         break;
