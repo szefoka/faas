@@ -12,9 +12,10 @@ spec:
         app: node-single-test
         version: v1
     spec:
+      restartPolicy: Always
       containers:
       - name: node-single-compute
-        image: 
+        image: 128.110.154.132:5000/node-single-test
         ports:
         - containerPort: 15000
         env:
@@ -23,11 +24,13 @@ spec:
         - name: NUM_PROCS
           value: "1"
         - name: USE_CG_TRICK
-          value: "1"
+          value: "0"
         - name: V8_CPU_TIME
-          value: "60000"
+          value: "0.65"
         - name: UV_CPU_TIME
-          value: "40000"
+          value: "0.35"
+        - name: ERROR_RATE
+          value: "-4"
         resources:
           limits:
             cpu: "1000m"

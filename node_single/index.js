@@ -2,19 +2,26 @@ const cluster = require('cluster');
 const http = require('http');
 const numCPUs = require('os').cpus().length;
 const fs = require('fs');
+const random = require('random');
 const hostname = '0.0.0.0';
 const port = 15000;
 
 var fptr;
 
-process.env.UV_THREADPOOL_SIZE = 1;
 const num_procs = process.env.NUM_PROCS;
 const func_type = process.env.FUNC_TYPE;
 const cgtrick = process.env.USE_CG_TRICK;
 uv_cpu_time = process.env.UV_CPU_TIME;
 v8_cpu_time = process.env.V8_CPU_TIME;
+error_rate = process.env.ERROR_RATE;
+var err_max = Math.pow(10, -1*(error_rate));
 var file_path = "";
 var first_run = cgtrick;
+
+if(cgtrick!=0) {
+    process.env.UV_THREADPOOL_SIZE = 1;
+}
+
 switch(func_type) {
     case 'compute':
         fptr = function (query, callback) {
@@ -58,10 +65,6 @@ switch(func_type) {
                         if(err) { return console.log(err); }
                         console.log("The file was saved! 1");
                     });
-                    fs.writeFile("/sys/fs/cgroup/cpuacct/node/v8/cpu.cfs_quota_us", v8_cpu_time, function(err) {
-                        if(err) { return console.log(err); }
-                        console.log("The file was saved! 2");
-                    });
                     fs.readFile('/sys/fs/cgroup/cpuacct/tasks', 'utf-8', function(err, data) {
                         if (err) { throw err; }
                         var lines = data.trim().split('\n');
@@ -71,12 +74,25 @@ switch(func_type) {
                             console.log("The file was saved! 3");
                         });
                     });
-                    fs.writeFile("/sys/fs/cgroup/cpuacct/node/uv/cpu.cfs_quota_us", uv_cpu_time, function(err) {
-                        if(err) { return console.log(err); }
-                        console.log("The file was saved! 4");
+                    var maxcpu = 0;
+                    fs.readFile('/sys/fs/cgroup/cpuacct/cpu.cfs_quota_us', 'utf-8', function(err, data) {
+                        if (err) { throw err; }
+                        var lines = data.trim().split('\n');
+                        maxcpu = lines.slice(-1)[0];
+                        fs.writeFile("/sys/fs/cgroup/cpuacct/node/uv/cpu.cfs_quota_us", Math.trunc(maxcpu * uv_cpu_time), function(err) {
+                            if(err) { return console.log(err); }
+                            console.log("The file was saved! 4");
+                        });
+                        fs.writeFile("/sys/fs/cgroup/cpuacct/node/v8/cpu.cfs_quota_us", Math.trunc(maxcpu * v8_cpu_time), function(err) {
+                            if(err) { return console.log(err); }
+                            console.log("The file was saved! 2");
+                        });
                     });
                 }
             });
+            if(random.int(0, err_max) == err_max-1) {
+                process.exit(1);
+            }
         }
         break;
     case 'mongo':
