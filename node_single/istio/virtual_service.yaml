@@ -16,3 +16,6 @@ spec:
         host: node-single-test
         port:
           number: 15000
+    retries:
+      attempts: 3
+      perTryTimeout: 2s
