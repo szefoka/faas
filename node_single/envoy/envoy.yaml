@@ -21,7 +21,13 @@ static_resources:
               routes:
               - match: { prefix: "/" }
                 route:
-                  retry_policy: {retry_on: "5xx", num_retries: 3, per_try_timeout_ms: 15000}
+                  retry_policy:
+                      retry_host_predicate:
+                      - name: envoy.retry_host_predicates.previous_hosts
+                      host_selection_retry_max_attempts: 3
+                      retry_on: "5xx"
+                      num_retries: 8
+                      per_try_timeout_ms: 2000
                   host_rewrite: node-single-test-headless
                   cluster: myapp_cluster
                   timeout: 60s
