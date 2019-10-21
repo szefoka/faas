@@ -13,9 +13,9 @@ spec:
         exact: /
     route:
     - destination:
-        host: node-single-test
+        host: node-single-test #.svc.cluster.local
         port:
-          number: 15000
+          number: 14000
     retries:
       attempts: 3
       perTryTimeout: 2s

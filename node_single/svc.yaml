@@ -2,12 +2,15 @@ kind: Service
 apiVersion: v1
 metadata:
   name: node-single-test
+  labels:
+    app: node-single-test
+    service: node-single-test
 spec:
   selector:
     app: node-single-test
   ports:
-  - protocol: TCP
-    port: 15000
+  #- protocol: TCP
+  - port: 14000
     name: http
   type: LoadBalancer
 

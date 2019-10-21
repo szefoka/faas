@@ -3,7 +3,7 @@ kind: DestinationRule
 metadata:
   name: node-single-test
 spec:
-  host: node-single-test.default.svc.cluster.local
+  host: node-single-test #.default.svc.cluster.local
   trafficPolicy:
     loadBalancer:
       simple: LEAST_CONN
