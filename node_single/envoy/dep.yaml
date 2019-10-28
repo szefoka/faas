@@ -15,15 +15,15 @@ spec:
     spec:
       containers:
       - name: node-envoy
-        image: 128.110.154.132:5000/node-envoy
+        image: 128.110.154.187:5000/node-envoy
         imagePullPolicy: Always
         env:
         - name: "ENVOY_LB_ALG"
-          value: "LEAST_REQUEST"
+          value: "ROUND_ROBIN"
         - name: "SERVICE_NAME"
           value: "node-single-test-headless"
         ports:
         - name: http
-          containerPort: 15000
+          containerPort: 14000
         - name: envoy-admin
           containerPort: 9901

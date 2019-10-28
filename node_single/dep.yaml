@@ -1,3 +1,4 @@
+
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -33,6 +34,6 @@ spec:
           value: "-4"
         resources:
           limits:
-            cpu: "1000m"
+            cpu: "250m"
         securityContext:
           privileged: true

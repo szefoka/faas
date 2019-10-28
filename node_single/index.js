@@ -37,6 +37,11 @@ switch(func_type) {
                 }
             }
             callback(pi.toString());
+            if(error_rate != 0) {
+                if(random.int(0, err_max) == err_max-1) {
+                    process.exit(1);
+                }
+            }
         };
         break;
     case 'echo':

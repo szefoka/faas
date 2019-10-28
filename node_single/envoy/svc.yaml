@@ -8,7 +8,7 @@ spec:
   type: ClusterIP
   ports:
   - name: http
-    port: 15000
+    port: 14000
     targetPort: http
     protocol: TCP
   selector:
