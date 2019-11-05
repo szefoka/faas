@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
       - name: node-envoy
-        image: 128.110.154.187:5000/node-envoy
+        image: 128.110.154.168:5000/faas-envoy
         imagePullPolicy: Always
         env:
         - name: "ENVOY_LB_ALG"

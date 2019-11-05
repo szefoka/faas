@@ -16,7 +16,7 @@ spec:
       restartPolicy: Always
       containers:
       - name: node-single-compute
-        image: 128.110.154.187:5000/node-single-test
+        image: 128.110.154.168:5000/node-single-test
         ports:
         - containerPort: 14000
         env:
