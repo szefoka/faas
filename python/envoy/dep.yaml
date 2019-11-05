@@ -1,0 +1,29 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: python-envoy
+  labels:
+    app: python-envoy
+spec:
+  selector:
+    matchLabels:
+      app: python-envoy
+  template:
+    metadata:
+      labels:
+        app: python-envoy
+    spec:
+      containers:
+      - name: python-envoy
+        image: 128.110.154.168:5000/faas-envoy
+        imagePullPolicy: Always
+        env:
+        - name: "ENVOY_LB_ALG"
+          value: "ROUND_ROBIN"
+        - name: "SERVICE_NAME"
+          value: "python-test-headless"
+        ports:
+        - name: http
+          containerPort: 14000
+        - name: envoy-admin
+          containerPort: 9901
