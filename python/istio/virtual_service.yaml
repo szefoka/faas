@@ -1,19 +1,19 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
-  name: node-single-test
+  name: python-test
 spec:
   hosts:
   - "*"
   gateways:
-  - node-single-test-gw
+  - python-test-gw
   http:
   - match:
     - uri:
-        exact: /node_single
+        exact: /python-test
     route:
     - destination:
-        host: node-single-test #.svc.cluster.local
+        host: python-test #.svc.cluster.local
         port:
           number: 14000
     retries:

@@ -11,4 +11,4 @@ RUN npm install mongodb --save
 RUN npm install shelljs
 COPY . .
 
-CMD ["node", "--v8-pool-size=1", "index.js"]
+CMD ["node", "index.js"]

@@ -12,6 +12,7 @@ import signal
 #import yep
 import uuid
 import multiprocessing
+import random
 
 from pymongo import MongoClient
 
@@ -23,20 +24,30 @@ timeout = float(os.getenv('FUNC_TIMEOUT', 180))
 
 app = Flask(__name__)
 
+error_rate = 0
+error_rate = int(os.getenv('ERROR_RATE'))
+error_rate = -1 * error_rate
+err_max = 10**error_rate
+
 def func_echo():
     return "Hello"
 
 def func_compute():
-    pi = 0.0
-    i = 0
-    while i < 50000:
-        new = 4.0/(1.0+i*2.0)
-        if not i%2:
-            pi += new
-        else:
-            pi -= new
-        i += 1
-    return str(pi)
+    try:
+        pi = 0.0
+        i = 0
+        while i < 50000:
+            new = 4.0/(1.0+i*2.0)
+            if not i%2:
+                pi += new
+            else:
+                pi -= new
+            i += 1
+        return str(pi)
+    finally:
+        if error_rate:
+            if random.randrange(err_max) == err_max-1:
+                sys.exit(0)
 
 def func_redis():
     try:
@@ -46,6 +57,9 @@ def func_redis():
         return r.get(_uuid)
     finally:
         r.connection_pool.disconnect()
+        if error_rate:
+            if random.randrange(err_max) == err_max-1:
+                sys.exit(0)
 
 def func_mongo():
     try:
@@ -92,11 +106,7 @@ elif func_type == 'cassandra':
     func_ptr =  func_cassandra
 
 
-@app.route('/healthz')
-def healthz():
-    return 'OK'
-
-@app.route('/faas-test', methods=['GET', 'POST', 'PATCH', 'DELETE'])
+@app.route('/', methods=['GET', 'POST', 'PATCH', 'DELETE'])
 def handler():
     return func_ptr()
 
@@ -113,12 +123,12 @@ if __name__ == '__main__':
     #yep.start('file_name.prof')
     flask_mode = os.getenv('FLASK_MODE')
     if flask_mode == 'single':
-        app.run('0.0.0.0', 15000, debug=False, threaded = False)
+        app.run('0.0.0.0', 14000, debug=False, threaded = False)
     elif flask_mode == 'threaded':
-        app.run('0.0.0.0', 15000, debug=False, threaded = True)
+        app.run('0.0.0.0', 14000, debug=False, threaded = True)
     elif flask_mode == 'multiprocess':
         cores = multiprocessing.cpu_count()
-        app.run('0.0.0.0', 15000, debug=False, threaded = False, processes=cores)
+        app.run('0.0.0.0', 14000, debug=False, threaded = False, processes=cores)
 
     signal.signal(signal.SIGINT, signal_handler)
     print('Press Ctrl+C')

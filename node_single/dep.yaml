@@ -1,4 +1,3 @@
-
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -16,12 +15,12 @@ spec:
       restartPolicy: Always
       containers:
       - name: node-single-compute
-        image: 128.110.154.168:5000/node-single-test
+        image: 128.110.154.168:5000/python-test
         ports:
         - containerPort: 14000
         env:
         - name: FUNC_TYPE
-          value: "redis"
+          value: redis
         - name: NUM_PROCS
           value: "1"
         - name: USE_CG_TRICK
@@ -34,6 +33,6 @@ spec:
           value: "-4"
         resources:
           limits:
-            cpu: "250m"
+            cpu: 250m
         securityContext:
           privileged: true
