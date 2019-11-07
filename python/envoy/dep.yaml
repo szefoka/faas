@@ -21,7 +21,7 @@ spec:
         - name: "ENVOY_LB_ALG"
           value: "ROUND_ROBIN"
         - name: "SERVICE_NAME"
-          value: "python-test-headless"
+          value: "python-headless"
         ports:
         - name: http
           containerPort: 14000

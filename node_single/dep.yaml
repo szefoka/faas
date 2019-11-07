@@ -1,21 +1,21 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: node-single-test
+  name: node-single
   labels:
     namespace: default
-    app: node-single-test
+    app: node-single
 spec:
   template:
     metadata:
       labels:
-        app: node-single-test
+        app: node-single
         version: v1
     spec:
       restartPolicy: Always
       containers:
-      - name: node-single-compute
-        image: 128.110.154.168:5000/python-test
+      - name: node-single
+        image: 128.110.154.168:5000/node-single-test
         ports:
         - containerPort: 14000
         env:

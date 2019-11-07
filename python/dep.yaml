@@ -1,15 +1,15 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: python-test
+  name: python
   labels:
     namespace: default
-    app: python-test
+    app: python
 spec:
   template:
     metadata:
       labels:
-        app: python-test
+        app: python
         version: v1
     spec:
       containers:

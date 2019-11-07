@@ -1,7 +1,7 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: Gateway
 metadata:
-  name: node-single-test-gw
+  name: node-single-gw
 spec:
   selector:
     istio: ingressgateway # use istio default controller

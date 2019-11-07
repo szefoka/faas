@@ -1,9 +1,9 @@
 apiVersion: networking.istio.io/v1alpha3
 kind: DestinationRule
 metadata:
-  name: node-single-test
+  name: node-single
 spec:
-  host: node-single-test #.default.svc.cluster.local
+  host: node-single #.default.svc.cluster.local
   trafficPolicy:
     loadBalancer:
       simple: ROUND_ROBIN

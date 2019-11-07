@@ -3,7 +3,7 @@ kind: Service
 metadata:
   name: node-envoy
   labels:
-    app: node--envoy
+    app: node-envoy
 spec:
   type: ClusterIP
   ports:

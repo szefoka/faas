@@ -1,13 +1,13 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: node-single-test
+  name: node-single
   labels:
-    app: node-single-test
-    service: node-single-test
+    app: node-single
+    service: node-single
 spec:
   selector:
-    app: node-single-test
+    app: node-single
   ports:
   #- protocol: TCP
   - port: 14000

@@ -1,7 +1,7 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: node-single-test-headless
+  name: node-single-headless
 spec:
   clusterIP: None
   ports:
@@ -9,4 +9,4 @@ spec:
     port: 14000
     protocol: TCP
   selector:
-    app: node-single-test
+    app: node-single

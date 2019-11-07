@@ -106,7 +106,7 @@ elif func_type == 'cassandra':
     func_ptr =  func_cassandra
 
 
-@app.route('/', methods=['GET', 'POST', 'PATCH', 'DELETE'])
+@app.route('/python', methods=['GET', 'POST', 'PATCH', 'DELETE'])
 def handler():
     return func_ptr()
 

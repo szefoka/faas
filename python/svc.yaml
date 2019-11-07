@@ -1,13 +1,13 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: python-test
+  name: python
   labels:
-    app: python-test
-    service: python-test
+    app: python
+    service: python
 spec:
   selector:
-    app: python-test
+    app: python
   ports:
   #- protocol: TCP
   - port: 14000

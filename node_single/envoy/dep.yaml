@@ -21,7 +21,7 @@ spec:
         - name: "ENVOY_LB_ALG"
           value: "ROUND_ROBIN"
         - name: "SERVICE_NAME"
-          value: "node-single-test-headless"
+          value: "node-single-headless"
         ports:
         - name: http
           containerPort: 14000
