@@ -37,16 +37,21 @@ def do_meas(runtime, addr, filename, task):
                 break
             time.sleep(1)
 
-        os.system("hey -c 100 -n 500000 -o csv http://"+addr+" > " + task+"_"+str(l[0])+filename+".csv")
+        os.system("hey -c 100 -n 500000 -o csv http://"+addr+" > " + runtime+"_"+task+"_"+str(l[0])+filename+".csv")
 
 
 for runtime in runtimes:
+    print runtime
     output = os.popen("kubectl get services | grep "+runtime+"-envoy | awk '{print $3 \"\t\" $5}' | cut -d '/' -f 1")
     envoy_addr = output.read().split()
     output = os.popen("kubectl get services | grep "+runtime+" | grep -v headless | awk '{print $3 \"\t\" $5}' | cut -d '/' -f 1 | cut -d ':' -f 1")
     kubeproxy_addr = output.read().split()
     output = os.popen("kubectl get services -n istio-system | grep istio-ingressgateway | awk '{print $3}'")
-    istio_addr = output.read() + "/" +runtime
+    istio_addr = output.read()
+    istio_addr = istio_addr.split()[0]+"/"+runtime
+    print envoy_addr
+    print kubeproxy_addr
+    print istio_addr
     for t in tasks:
         for p in proxies:
             #p = "envoy"
@@ -95,4 +100,4 @@ for runtime in runtimes:
                     time.sleep(10)
                     filename ="_istio_"+alg
                     do_meas(runtime, addr, filename, t)
-
+    os.system("kubectl delete -f tmp_dep.yaml")
