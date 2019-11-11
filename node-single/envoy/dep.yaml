@@ -1,20 +1,20 @@
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
-  name: node-envoy
+  name: node-single-envoy
   labels:
-    app: node-envoy
+    app: node-single-envoy
 spec:
   selector:
     matchLabels:
-      app: node-envoy
+      app: node-single-envoy
   template:
     metadata:
       labels:
-        app: node-envoy
+        app: node-single-envoy
     spec:
       containers:
-      - name: node-envoy
+      - name: node-single-envoy
         image: 128.110.154.168:5000/faas-envoy
         imagePullPolicy: Always
         env:

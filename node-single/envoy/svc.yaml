@@ -1,9 +1,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: node-envoy
+  name: node-single-envoy
   labels:
-    app: node-envoy
+    app: node-single-envoy
 spec:
   type: ClusterIP
   ports:
@@ -12,4 +12,4 @@ spec:
     targetPort: http
     protocol: TCP
   selector:
-    app: node-envoy
+    app: node-single-envoy
