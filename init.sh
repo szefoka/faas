@@ -5,7 +5,7 @@ cd envoy
 bash build.sh
 cd ..
 yq w python/envoy/dep.yaml spec.template.spec.containers[0].image "$IP_PORT"/faas-envoy
-yq w node_single/envoy/dep.yaml spec.template.spec.containers[0].image "$IP_PORT"/faas-envoy
+yq w node-single/envoy/dep.yaml spec.template.spec.containers[0].image "$IP_PORT"/faas-envoy
 
 #python
 cd python
@@ -16,8 +16,9 @@ kubectl apply -f istio/
 cd ..
 
 #Node.js
-cd node_single
+cd node-single
 bash build.sh
 kubectl apply -f svc.yaml
 kubectl apply -f envoy/
 kubectl apply -f istio/
+cd ..

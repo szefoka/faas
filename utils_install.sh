@@ -12,6 +12,11 @@ apt-get install python-pip
 #cqlsh
 pip install cqlsh
 
+#yq
+sudo add-apt-repository ppa:rmescandon/yq
+sudo apt update
+sudo apt install yq -y
+
 #Golang
 sudo add-apt-repository -y ppa:longsleep/golang-backports
 sudo apt-get update
