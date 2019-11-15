@@ -70,9 +70,13 @@ for runtime in runtimes:
                 y = None
                 for alg in envoy_lb_algs:
                     path = runtime+"/"+t+"/"+p+"/"+alg
+<<<<<<< HEAD
                     if not os.path.exists("results/"+path):
                         os.makedirs("results/"+path)
                     nfiles = len([name for name in os.listdir("results/"+path) if os.path.isfile(os.path.join("results/"+path, name))])
+=======
+                    nfiles = len([name for name in os.listdir(path) if os.path.isfile(os.path.join(path, name))])
+>>>>>>> a5a542bdbdd9f2d0e914a249c86243ff789dce26
                     if nfiles < len(limits):
                         with open(runtime+"/envoy/dep.yaml", "r") as f:
                             y = f.read()
@@ -95,9 +99,13 @@ for runtime in runtimes:
                 addr = istio_addr
                 for alg in istio_lb_algs:
                     path = runtime+"/"+t+"/"+p+"/"+alg
+<<<<<<< HEAD
                     if not os.path.exists("results/"+path):
                         os.makedirs("results/"+path)
                     nfiles = len([name for name in os.listdir("results/"+path) if os.path.isfile(os.path.join("results/"+path, name))])
+=======
+                    nfiles = len([name for name in os.listdir(path) if os.path.isfile(os.path.join(path, name))])
+>>>>>>> a5a542bdbdd9f2d0e914a249c86243ff789dce26
                     if nfiles < len(limits):
                         with open(runtime+"/istio/destination_rule.yaml", "r") as f:
                             y = f.read()
@@ -111,3 +119,4 @@ for runtime in runtimes:
                         time.sleep(10)
                         do_meas(runtime, addr, t, path)
     os.system("kubectl delete -f tmp_dep.yaml")
+

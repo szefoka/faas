@@ -20,7 +20,7 @@ spec:
         - containerPort: 14000
         env:
         - name: FUNC_TYPE
-          value: redis
+          value: compute
         - name: NUM_PROCS
           value: "1"
         - name: USE_CG_TRICK
@@ -33,6 +33,6 @@ spec:
           value: "0"
         resources:
           limits:
-            cpu: 250m
+            cpu: 1000m
         securityContext:
           privileged: true
