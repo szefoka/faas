@@ -10,7 +10,7 @@ spec:
   http:
   - match:
     - uri:
-        exact: /node_single
+        exact: /node-single
     route:
     - destination:
         host: node-single #.svc.cluster.local
