@@ -4,8 +4,8 @@ IP_PORT=$(ip a l $(route -n | awk '$1 == "0.0.0.0" {print $8}') | grep "inet" | 
 cd envoy
 bash build.sh
 cd ..
-yq w python/envoy/dep.yaml spec.template.spec.containers[0].image "$IP_PORT"/faas-envoy
-yq w node_single/envoy/dep.yaml spec.template.spec.containers[0].image "$IP_PORT"/faas-envoy
+yq w -i python/envoy/dep.yaml spec.template.spec.containers[0].image "$IP_PORT"/faas-envoy
+yq w -i node_single/envoy/dep.yaml spec.template.spec.containers[0].image "$IP_PORT"/faas-envoy
 
 #python
 cd python
