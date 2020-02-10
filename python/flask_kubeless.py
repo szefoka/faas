@@ -4,7 +4,7 @@ import os
 import imp
 import datetime
 from multiprocessing import Process, Queue
-from flask import Flask, request
+from flask import Flask, request, g
 import json
 import redis
 import sys
@@ -13,6 +13,8 @@ import signal
 import uuid
 import multiprocessing
 import random
+import time
+import logging
 
 from pymongo import MongoClient
 
@@ -106,6 +108,15 @@ elif func_type == 'cassandra':
     func_ptr =  func_cassandra
 
 
+@app.before_request
+def before_request():
+  g.start = time.time()
+
+@app.teardown_request
+def teardown_request(exception=None):
+    diff = time.time() - g.start
+    logging.warning(diff)
+
 @app.route('/python', methods=['GET', 'POST', 'PATCH', 'DELETE'])
 def handler():
     return func_ptr()
@@ -116,7 +127,7 @@ def signal_handler(sig, frame):
         sys.exit(0)
 
 if __name__ == '__main__':
-    import logging
+    #import logging
     import sys
     log = logging.getLogger('werkzeug')
     log.setLevel(logging.ERROR)
