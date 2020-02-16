@@ -14,13 +14,22 @@ spec:
     spec:
       containers:
       - name: python-redis
-        image: 128.110.154.168:5000/python-test
+        image: 128.110.154.205:5000/python-test
         ports:
         - containerPort: 14000
         env:
         - name: FUNC_TYPE
-          value: redis
+          value: compute
         - name: FLASK_MODE
-          value: single
+          value: multiprocess
+        - name: NUMPROCS
+          value: "12"
         - name: ERROR_RATE
           value: "0"
+        resources:
+          requests:
+            cpu: "3000m"
+            memory: "256Mi"
+          limits:
+            cpu: "3000m"
+            memory: "256Mi"

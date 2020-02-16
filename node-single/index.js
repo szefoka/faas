@@ -27,7 +27,7 @@ switch(func_type) {
         fptr = function (query, callback) {
             var i;
             var pi = 0;
-            for (i = 0; i < 50000; i++) {
+            for (i = 0; i < 150000; i++) {
                 _new = 4.0/(1.0+i*2.0);
                 if (i%2 != 0) {
                     pi -= _new
@@ -148,7 +148,7 @@ if (num_procs > 1) {
     console.log(`Master ${process.pid} is running`);
 
     // Fork workers.
-    for (let i = 0; i < num_procs; i++) {
+    for (let i = 0; i < num_procs-1; i++) {
       cluster.fork();
     }
     cluster.on('exit', (worker, code, signal) => {

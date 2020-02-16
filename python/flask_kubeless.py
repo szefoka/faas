@@ -31,6 +31,8 @@ error_rate = int(os.getenv('ERROR_RATE'))
 error_rate = -1 * error_rate
 err_max = 10**error_rate
 
+num_procs = int(os.getenv('NUMPROCS', "1"))
+
 def func_echo():
     return "Hello"
 
@@ -49,7 +51,8 @@ def func_compute():
     finally:
         if error_rate:
             if random.randrange(err_max) == err_max-1:
-                sys.exit(0)
+                #sys.exit(0)
+                os._exit(0)
 
 def func_redis():
     try:
@@ -115,7 +118,7 @@ def before_request():
 @app.teardown_request
 def teardown_request(exception=None):
     diff = time.time() - g.start
-    logging.warning(diff)
+    logging.warning(str('{} {} {}'.format(diff, g.start, time.time())))
 
 @app.route('/python', methods=['GET', 'POST', 'PATCH', 'DELETE'])
 def handler():
@@ -139,7 +142,7 @@ if __name__ == '__main__':
         app.run('0.0.0.0', 14000, debug=False, threaded = True)
     elif flask_mode == 'multiprocess':
         cores = multiprocessing.cpu_count()
-        app.run('0.0.0.0', 14000, debug=False, threaded = False, processes=cores)
+        app.run('0.0.0.0', 14000, debug=False, threaded = False, processes=num_procs)
 
     signal.signal(signal.SIGINT, signal_handler)
     print('Press Ctrl+C')

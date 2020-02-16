@@ -6,4 +6,4 @@ spec:
   host: node-single #.default.svc.cluster.local
   trafficPolicy:
     loadBalancer:
-      simple: ROUND_ROBIN
+      simple: LEAST_CONN

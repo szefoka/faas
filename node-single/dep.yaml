@@ -15,14 +15,14 @@ spec:
       restartPolicy: Always
       containers:
       - name: node-single
-        image: 128.110.154.168:5000/node-single-test
+        image: 128.110.154.205:5000/node-single-test
         ports:
         - containerPort: 14000
         env:
         - name: FUNC_TYPE
           value: compute
         - name: NUM_PROCS
-          value: "1"
+          value: "4"
         - name: USE_CG_TRICK
           value: "0"
         - name: V8_CPU_TIME
@@ -31,8 +31,12 @@ spec:
           value: "0.35"
         - name: ERROR_RATE
           value: "0"
+        - name: NODE_CLUSTER_SCHED_POLICY
+          value: rr
         resources:
           limits:
-            cpu: 1000m
+            cpu: 6000m
+          requests:
+            cpu: 6000m
         securityContext:
           privileged: true
