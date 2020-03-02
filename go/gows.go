@@ -24,7 +24,7 @@ var func_test FuncTest
 
 func compute_test() string {
 	pi := 0.0
-	for i := 0.0; i < 5000000.0; i++ {
+	for i := 0.0; i < 50000.0; i++ {
 		_new := 4.0/(1.0+i*2.0)
 		if ((int(i))%2) == 0 {
 			pi += _new
